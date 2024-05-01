@@ -25,16 +25,16 @@ public:
 	// Sets default values for this pawn's properties
 	ATopDownPawn();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UCapsuleComponent* CapsuleComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* SpringArmComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* CameraComponent;
 
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UFloatingPawnMovement* FloatingPawnMovement;
 
 protected:
@@ -42,11 +42,12 @@ protected:
 	virtual void BeginPlay() override;
 
 	void Spawn();
-	//virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-	void Look(const FInputActionValue& Value);
 
 	UFUNCTION(BlueprintCallable)
 	void Move(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable)
+	void Zoom(const FInputActionValue& Value);
 
 public:	
 	// Called every frame

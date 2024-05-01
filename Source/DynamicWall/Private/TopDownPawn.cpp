@@ -17,64 +17,24 @@ ATopDownPawn::ATopDownPawn()
 	RootComponent = CapsuleComponent;
 
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
-	SpringArmComponent->SetRelativeRotation(FRotator(-60.f, 0.f, 0.f));
 	SpringArmComponent->SetupAttachment(RootComponent);
-	SpringArmComponent->TargetArmLength = 150.f;
-	SpringArmComponent->TargetOffset = FVector(0.f, 0.f, 250.f);
+	SpringArmComponent->TargetArmLength = -211.599960;
+	SpringArmComponent->TargetOffset = FVector(-520, 0, 540);
 	SpringArmComponent->bUsePawnControlRotation = true;
 
+	float Angle = FMath::RadiansToDegrees(atan(SpringArmComponent->TargetOffset.Z / SpringArmComponent->TargetArmLength));
+
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	CameraComponent->SetRelativeRotation(FRotator(-60.f, 0.f, 0.f));
-	CameraComponent->SetRelativeLocation(FVector(-30.f, 0.f, 30.f));
+	CameraComponent->SetRelativeRotation(FRotator(-Angle, 0, 0));
 	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
 
 	FloatingPawnMovement = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("FloatingPawnMovement"));
-}
-
-void ATopDownPawn::Spawn()
-{
-	FVector PawnLocation = {0.f, 0.f, 100.f};
-	FRotator PawnRotation = {0.f, 0.f, 0.f};
-	//if (GetController()->GetPawn()) {
-
-	//	PawnLocation = GetController()->GetPawn()->GetActorLocation();
-	//	PawnRotation = GetController()->GetPawn()->GetActorRotation();
-
-	//	//GetController()->GetPawn()->Destroy();
-	//}
-
-	UWorld* World = GetWorld();
-
-	if (World) {
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-		/*if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(World->GetFirstLocalPlayerFromController())) {
-			Subsystem->ClearAllMappings();
-		}*/
-
-		APawn* SpawnedPawn = World->SpawnActor<APawn>(PawnLocation, PawnRotation, SpawnParams);
-
-		if (SpawnedPawn) {
-			APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-			if (PlayerController)
-			{
-				PlayerController->Possess(this);
-			}
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Succeeded to Spawn"));
-		}
-		else {
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Failed to Spawn"));
-		}
-	}
 }
 
 // Called when the game starts or when spawned
 void ATopDownPawn::BeginPlay()
 {
 	Super::BeginPlay();
-
-	Spawn();
 }
 
 
@@ -82,65 +42,9 @@ void ATopDownPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	//if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
-	//	UInputMappingContext* InputMappingContext = NewObject<UInputMappingContext>();
-
-	//	UInputAction* MoveAction = NewObject<UInputAction>();
-	//	MoveAction->ValueType = EInputActionValueType::Axis3D;
-
-	//	UInputModifierSwizzleAxis* YXZSwizzleAxisModifier = NewObject<UInputModifierSwizzleAxis>();
-	//	YXZSwizzleAxisModifier->Order = EInputAxisSwizzle::YXZ;
-
-	//	UInputModifierSwizzleAxis* ZYXSwizzleAxisModifier = NewObject<UInputModifierSwizzleAxis>();
-	//	ZYXSwizzleAxisModifier->Order = EInputAxisSwizzle::ZYX;
-
-	//	UInputModifierNegate* MoveActionNegateModifier = NewObject<UInputModifierNegate>();
-	//	MoveActionNegateModifier->bX = true;
-	//	MoveActionNegateModifier->bY = true;
-	//	MoveActionNegateModifier->bZ = true;
-
-	//	InputMappingContext->MapKey(MoveAction, EKeys::W);
-
-	//	FEnhancedActionKeyMapping& MoveActionBackwardKeyMapping = InputMappingContext->MapKey(MoveAction, EKeys::S);
-	//	MoveActionBackwardKeyMapping.Modifiers.Add(MoveActionNegateModifier);
-
-	//	FEnhancedActionKeyMapping& MoveActionRightKeyMapping = InputMappingContext->MapKey(MoveAction, EKeys::D);
-	//	MoveActionRightKeyMapping.Modifiers.Add(YXZSwizzleAxisModifier);
-
-	//	FEnhancedActionKeyMapping& MoveActionLeftKeyMapping = InputMappingContext->MapKey(MoveAction, EKeys::A);
-	//	MoveActionLeftKeyMapping.Modifiers.Add(YXZSwizzleAxisModifier);
-	//	MoveActionLeftKeyMapping.Modifiers.Add(MoveActionNegateModifier);
-
-	//	FEnhancedActionKeyMapping& MoveActionUpKeyMapping = InputMappingContext->MapKey(MoveAction, EKeys::E);
-	//	MoveActionUpKeyMapping.Modifiers.Add(ZYXSwizzleAxisModifier);
-
-	//	FEnhancedActionKeyMapping& MoveActionDownKeyMapping = InputMappingContext->MapKey(MoveAction, EKeys::Q);
-	//	MoveActionDownKeyMapping.Modifiers.Add(ZYXSwizzleAxisModifier);
-	//	MoveActionDownKeyMapping.Modifiers.Add(MoveActionNegateModifier);
-
-
-	//	UInputAction* LookAction = NewObject<UInputAction>();
-	//	LookAction->ValueType = EInputActionValueType::Axis2D;
-
-	//	UInputModifierNegate* LookActionMouseNegateModifier = NewObject<UInputModifierNegate>();
-	//	LookActionMouseNegateModifier->bX = false;
-	//	LookActionMouseNegateModifier->bY = true;
-	//	LookActionMouseNegateModifier->bZ = false;
-
-	//	FEnhancedActionKeyMapping& LookActionMouseMapping = InputMappingContext->MapKey(LookAction, EKeys::Mouse2D);
-	//	LookActionMouseMapping.Modifiers.Add(LookActionMouseNegateModifier);
-
-	//	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ATopDownPawn::Move);
-	//	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ATopDownPawn::Look);
-
-	//	if (const APlayerController* PlayerController = Cast<APlayerController>(Controller)) {
-	//		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer())) {
-	//			//Subsystem->ClearAllMappings();
-	//			Subsystem->AddMappingContext(InputMappingContext, 0);
-	//		}
-	//	}
-
-	//}
+	if (!CameraComponent) {
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Camera null"));
+	}
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
 		UInputMappingContext* InputMappingContext = NewObject<UInputMappingContext>();
@@ -168,6 +72,14 @@ void ATopDownPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		MoveActionLeftKeyMapping.Modifiers.Add(YXZSwizzleAxisModifier);
 		MoveActionLeftKeyMapping.Modifiers.Add(MoveActionNegateModifier);
 
+		//--------------- Zoom Action ---------------------//
+		UInputAction* ZoomAction = NewObject<UInputAction>();
+		ZoomAction->ValueType = EInputActionValueType::Axis1D;
+
+		FEnhancedActionKeyMapping& ZoomMapping = InputMappingContext->MapKey(ZoomAction, EKeys::MouseWheelAxis);
+		//ZoomMapping.Scale = 1.0f;
+		EnhancedInputComponent->BindAction(ZoomAction, ETriggerEvent::Triggered, this, &ATopDownPawn::Zoom);
+		
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ATopDownPawn::Move);
 
 		if (const APlayerController* PlayerController = Cast<APlayerController>(Controller)) {
@@ -178,14 +90,6 @@ void ATopDownPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 	}
 }
-
-//void ATopDownPawn::Look(const FInputActionValue& Value)
-//{
-//	FVector2D LookAxisVector = Value.Get<FVector2D>();
-//
-//	AddControllerYawInput(LookAxisVector.X);
-//	AddControllerPitchInput(LookAxisVector.Y);
-//}
 
 void ATopDownPawn::Move(const FInputActionValue& Value)
 {
@@ -203,6 +107,59 @@ void ATopDownPawn::Move(const FInputActionValue& Value)
 	// add movement 
 	AddMovementInput(ForwardDirection, MovementVector.X);
 	AddMovementInput(RightDirection, MovementVector.Y);
+}
+
+void ATopDownPawn::Zoom(const FInputActionValue& Value) {
+
+	if(CameraComponent) {
+		float ZoomDelta = Value.Get<float>(); // 1 / -1
+		
+		float TargetArmLength = SpringArmComponent->TargetArmLength;
+		float TargetOffsetZ = SpringArmComponent->TargetOffset.Z;
+
+		if (TargetArmLength >= -460) {
+			SpringArmComponent->TargetOffset.Z -= ZoomDelta * 20;
+		}
+		if (TargetOffsetZ <= 1000) {
+			SpringArmComponent->TargetArmLength -= ZoomDelta * 9.2;
+		}
+		
+		SpringArmComponent->TargetArmLength = FMath::Clamp(SpringArmComponent->TargetArmLength, -500, 0);
+		SpringArmComponent->TargetOffset.Z = FMath::Clamp(SpringArmComponent->TargetOffset.Z, 0, 1500);
+
+		FString FloatAsString = FString::SanitizeFloat(SpringArmComponent->TargetArmLength);
+		FString DebugMessage = FString::Printf(TEXT("MyFloatValue: %s"), *FloatAsString);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, FString::Printf(TEXT("armlength: %f"), SpringArmComponent->TargetArmLength));
+
+		FloatAsString = FString::SanitizeFloat(SpringArmComponent->TargetOffset.Z);
+		DebugMessage = FString::Printf(TEXT("MyFloatValue: %s"), *FloatAsString);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, FString::Printf(TEXT("offsetZ: %f"), SpringArmComponent->TargetOffset.Z));
+
+		float Angle;
+		if (SpringArmComponent->TargetArmLength == 0) {
+			Angle = -90;
+		}
+		else {
+			Angle = FMath::RadiansToDegrees(atan(SpringArmComponent->TargetOffset.Z / SpringArmComponent->TargetArmLength));
+			Angle = FMath::Clamp(Angle, -90, 0);
+		}
+
+		if (Angle < -90) {
+			Angle = -90;
+		}
+		if (Angle > 0) {
+			Angle = 0;
+		}
+
+		FloatAsString = FString::SanitizeFloat(Angle);
+		DebugMessage = FString::Printf(TEXT("MyFloatValue: %s"), *FloatAsString);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, FString::Printf(TEXT("Angle: %f"), Angle));
+
+		CameraComponent->SetRelativeRotation(FRotator(Angle, 0, 0));
+	}
+	else {
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("ZoomError"));
+	}
 }
 
 // Called every frame
