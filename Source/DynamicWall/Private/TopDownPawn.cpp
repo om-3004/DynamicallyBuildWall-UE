@@ -169,11 +169,4 @@ void ATopDownPawn::Tick(float DeltaTime)
 
 }
 
-// Called to bind functionality to input
-//void ATopDownPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-//{
-//	Super::SetupPlayerInputComponent(PlayerInputComponent);
-//
-//}
-
 
