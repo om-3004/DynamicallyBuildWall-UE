@@ -20,35 +20,14 @@ UCLASS()
 class DYNAMICWALL_API AWallSpline : public AActor
 {
 	GENERATED_BODY()
-	
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", Category = "MySplineModificaiton"))
-	USceneComponent* SceneComponent;
-
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", Category = "MySplineModificaiton"))
-	USplineComponent* SplineComponent;
-
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", Category = "MySplineModificaiton"))
-	TArray<USplineMeshComponent*> SplineMeshComponents;
-
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", Category = "MySplineModificaiton"))
-	TArray<UStaticMeshComponent*> StaticMeshComponents;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true", Category = "MySplineModificaiton"))
-	UStaticMesh* SplineStaticMesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true", Category = "MySplineModificaiton"))
-	TEnumAsByte<ESplineMeshAxis::Type> MeshForwardAxis = ESplineMeshAxis::X;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true", Category = "MySplineModificaiton"))
-	TEnumAsByte<EMeshType> MeshType;
 
 
 public:	
 	// Sets default values for this actor's properties
 	AWallSpline();
 
-	UFUNCTION(BlueprintCallable)
-	void GenerateSplineMeshes();
+	void GenerateSplineMeshComponents();
+	void GenerateWall(FVector ClickedLocation);
 
 protected:
 	// Called when the game starts or when spawned
@@ -56,6 +35,16 @@ protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 public:	
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", Category = "MySplineModificaiton"))
+	USceneComponent* SceneComponent;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", Category = "MySplineModificaiton"))
+	USplineComponent* SplineComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true", Category = "MySplineModificaiton"))
+	UStaticMesh* SplineStaticMesh;
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

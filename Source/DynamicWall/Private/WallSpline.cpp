@@ -15,50 +15,42 @@ AWallSpline::AWallSpline()
 	SplineComponent = CreateDefaultSubobject<USplineComponent>("SplineComponent");
 	SplineComponent->SetupAttachment(SceneComponent);
 
+	SplineComponent->ClearSplinePoints();
 }
 
-void AWallSpline::GenerateSplineMeshes()
+void AWallSpline::GenerateSplineMeshComponents()
 {
-	for (int i=0 ; i<SplineMeshComponents.Num() ; i++)
-	{
-		if (SplineMeshComponents[i])
-		{
-			SplineMeshComponents[i]->DestroyComponent();
-			SplineMeshComponents[i] = nullptr;
-		}
-	}
-	SplineMeshComponents.Empty();
-	
-	for (int i=0 ; i<StaticMeshComponents.Num() ; i++)
-	{
-		if (StaticMeshComponents[i])
-		{
-			StaticMeshComponents[i]->DestroyComponent();
-			StaticMeshComponents[i] = nullptr;
-		}
-	}
-	StaticMeshComponents.Empty();
-
 	int32 NoOfSplinePoints = SplineComponent->GetNumberOfSplinePoints();
-	for (int i=0 ; i<NoOfSplinePoints ; i++)
+
+	UE_LOG(LogTemp, Warning, TEXT("No of Spline Points: %d"), NoOfSplinePoints);
+
+	for (int i = 0; i < NoOfSplinePoints; i++)
 	{
-		if(i < NoOfSplinePoints - 1) {
+		if (i < NoOfSplinePoints - 1) {
 			FVector StartPosition, StartTangent;
-			SplineComponent->GetLocationAndTangentAtSplinePoint(i, StartPosition, StartTangent, ESplineCoordinateSpace::World);
+			SplineComponent->SetSplinePointType(i, ESplinePointType::Linear);
+			SplineComponent->GetLocationAndTangentAtSplinePoint(i, StartPosition, StartTangent, ESplineCoordinateSpace::Local);
 
 			FVector EndPosition, EndTangent;
-			SplineComponent->GetLocationAndTangentAtSplinePoint(i + 1, EndPosition, EndTangent, ESplineCoordinateSpace::World);
+			SplineComponent->GetLocationAndTangentAtSplinePoint(i + 1, EndPosition, EndTangent, ESplineCoordinateSpace::Local);
 
 			USplineMeshComponent* SplineMeshComponent = NewObject<USplineMeshComponent>(this, USplineMeshComponent::StaticClass());
+			SplineMeshComponent->SetMobility(EComponentMobility::Movable);
 			SplineMeshComponent->RegisterComponent();
 			SplineMeshComponent->SetStaticMesh(SplineStaticMesh);
 
 			SplineMeshComponent->SetStartAndEnd(StartPosition, StartTangent, EndPosition, EndTangent);
-			SplineMeshComponent->SetupAttachment(SplineComponent);
-			SplineMeshComponent->ForwardAxis = MeshForwardAxis;
-
-			SplineMeshComponents.Add(SplineMeshComponent);
+			SplineMeshComponent->AttachToComponent(SplineComponent, FAttachmentTransformRules::KeepRelativeTransform);
 		}
+	}
+}
+void AWallSpline::GenerateWall(FVector ClickedLocation)
+{
+	if (SplineComponent) {
+		SplineComponent->AddSplinePoint(ClickedLocation, ESplineCoordinateSpace::Local);
+		UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *ClickedLocation.ToString());
+
+		GenerateSplineMeshComponents();
 	}
 }
 
@@ -73,7 +65,6 @@ void AWallSpline::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	GenerateSplineMeshes();
 }
 
 // Called every frame
