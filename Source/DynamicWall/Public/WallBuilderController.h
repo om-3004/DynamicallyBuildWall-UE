@@ -18,9 +18,21 @@ class DYNAMICWALL_API AWallBuilderController : public APlayerController
 	GENERATED_BODY()
 	
 	void BuildWall();
+	void BuildNewWall();
+	void GoToPreviousWall();
+	void GoToNextWall();
+
+	UPROPERTY()
+	int currWall;
+
+	UPROPERTY()
+	bool bWasLeftClickLatest;
 
 	UPROPERTY()
 	AWallSpline* WallSpline;
+
+	UPROPERTY()
+	TArray<AWallSpline*> WallSplineArray;
 
 protected:
 	virtual void BeginPlay() override;

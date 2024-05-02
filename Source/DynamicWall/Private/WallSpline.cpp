@@ -16,6 +16,8 @@ AWallSpline::AWallSpline()
 	SplineComponent->SetupAttachment(SceneComponent);
 
 	SplineComponent->ClearSplinePoints();
+
+	/*SplineStaticMesh = LoadObject<UStaticMesh>(this, TEXT("/Script/Engine.StaticMesh'/Game/StarterContent/Architecture/Wall_400x200.Wall_400x200'"));*/
 }
 
 void AWallSpline::GenerateSplineMeshComponents()
