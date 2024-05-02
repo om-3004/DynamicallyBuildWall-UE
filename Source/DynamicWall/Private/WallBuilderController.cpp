@@ -74,6 +74,12 @@ void AWallBuilderController::GoToNextWall()
 	}
 }
 
+void AWallBuilderController::DeleteSetOfWall()
+{
+	WallSplineArray[currWall]->SplineComponent->ClearSplinePoints();
+	WallSplineArray[currWall]->Destroy();
+}
+
 void AWallBuilderController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
@@ -96,11 +102,16 @@ void AWallBuilderController::SetupInputComponent()
 	NextWall->ValueType = EInputActionValueType::Boolean;
 	InputMappingContext->MapKey(NextWall, EKeys::N);
 
+	UInputAction* DestroySetOfWall = NewObject<UInputAction>();
+	DestroySetOfWall->ValueType = EInputActionValueType::Boolean;
+	InputMappingContext->MapKey(DestroySetOfWall, EKeys::B);
+
 	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
 	EnhancedInputComponent->BindAction(CreateWall, ETriggerEvent::Completed, this, &AWallBuilderController::BuildWall);
 	EnhancedInputComponent->BindAction(NewWall, ETriggerEvent::Completed, this, &AWallBuilderController::BuildNewWall);
 	EnhancedInputComponent->BindAction(PreviousWall, ETriggerEvent::Completed, this, &AWallBuilderController::GoToPreviousWall);
 	EnhancedInputComponent->BindAction(NextWall, ETriggerEvent::Completed, this, &AWallBuilderController::GoToNextWall);
+	EnhancedInputComponent->BindAction(DestroySetOfWall, ETriggerEvent::Completed, this, &AWallBuilderController::DeleteSetOfWall);
 
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer())) {
 		Subsystem->AddMappingContext(InputMappingContext, 0);

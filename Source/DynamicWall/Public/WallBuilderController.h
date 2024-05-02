@@ -21,6 +21,7 @@ class DYNAMICWALL_API AWallBuilderController : public APlayerController
 	void BuildNewWall();
 	void GoToPreviousWall();
 	void GoToNextWall();
+	void DeleteSetOfWall();
 
 	UPROPERTY()
 	int currWall;

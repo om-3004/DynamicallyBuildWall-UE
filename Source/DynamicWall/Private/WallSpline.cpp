@@ -20,9 +20,23 @@ AWallSpline::AWallSpline()
 	/*SplineStaticMesh = LoadObject<UStaticMesh>(this, TEXT("/Script/Engine.StaticMesh'/Game/StarterContent/Architecture/Wall_400x200.Wall_400x200'"));*/
 }
 
+//void AWallSpline::deleteComponents()
+//{
+//	for (int i = 0; i < SplineMeshComponentsArray.Num(); i++)
+//	{
+//		if (SplineMeshComponentsArray[i])
+//		{
+//			SplineMeshComponentsArray[i]->DestroyComponent();
+//			SplineMeshComponentsArray[i] = nullptr;
+//		}
+//	}
+//	SplineMeshComponentsArray.Empty();
+//}
+
 void AWallSpline::GenerateSplineMeshComponents()
 {
-	int32 NoOfSplinePoints = SplineComponent->GetNumberOfSplinePoints();
+	//deleteComponents();
+	NoOfSplinePoints = SplineComponent->GetNumberOfSplinePoints();
 
 	UE_LOG(LogTemp, Warning, TEXT("No of Spline Points: %d"), NoOfSplinePoints);
 
@@ -43,6 +57,8 @@ void AWallSpline::GenerateSplineMeshComponents()
 
 			SplineMeshComponent->SetStartAndEnd(StartPosition, StartTangent, EndPosition, EndTangent);
 			SplineMeshComponent->AttachToComponent(SplineComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
+			SplineMeshComponentsArray.Add(SplineMeshComponent);
 		}
 	}
 }
