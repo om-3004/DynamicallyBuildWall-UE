@@ -22,6 +22,7 @@ class DYNAMICWALL_API AWallBuilderController : public APlayerController
 	void GoToPreviousWall();
 	void GoToNextWall();
 	void DeleteSetOfWall();
+	void UndoLastWall();
 
 	UPROPERTY()
 	int currWall;
@@ -30,10 +31,16 @@ class DYNAMICWALL_API AWallBuilderController : public APlayerController
 	bool bWasLeftClickLatest;
 
 	UPROPERTY()
+	int32 meshNo;
+
+	UPROPERTY()
 	AWallSpline* WallSpline;
 
 	UPROPERTY()
 	TArray<AWallSpline*> WallSplineArray;
+
+	UPROPERTY()
+	TArray<FVector> PointsLocation;
 
 protected:
 	virtual void BeginPlay() override;

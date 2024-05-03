@@ -29,6 +29,7 @@ public:
 	void GenerateSplineMeshComponents();
 	void GenerateWall(FVector ClickedLocation);
 	void deleteComponents();
+	void deleteLastWall();
 
 protected:
 	// Called when the game starts or when spawned
@@ -49,5 +50,7 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UPROPERTY()
 	int32 NoOfSplinePoints;
 };

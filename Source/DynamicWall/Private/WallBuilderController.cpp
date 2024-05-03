@@ -9,7 +9,11 @@
 
 AWallBuilderController::AWallBuilderController() : currWall{ 0 }
 {
-	WallSpline = CreateDefaultSubobject<AWallSpline>(TEXT("Wall Spline 0"));
+	FString SplineName = FString::Printf(TEXT("Wall Spline %d"), meshNo);
+	meshNo++;
+	WallSpline = CreateDefaultSubobject<AWallSpline>(*SplineName);
+
+	//WallSpline = CreateDefaultSubobject<AWallSpline>(TEXT("Wall Spline 0"));
 	WallSplineArray.Add(WallSpline);
 	WallSpline->SplineStaticMesh = LoadObject<UStaticMesh>(this, TEXT("/Script/Engine.StaticMesh'/Game/StarterContent/Architecture/Wall_400x200.Wall_400x200'"));
 }
@@ -29,6 +33,7 @@ void AWallBuilderController::BuildWall()
 	if (HitResult.bBlockingHit)
 	{
 		FVector ClickedLocation = HitResult.Location;
+		//PointsLocation[currWall] = HitResult.Location;
 		if (WallSplineArray[currWall]) {
 			WallSplineArray[currWall]->GenerateWall(ClickedLocation);
 		}
@@ -46,7 +51,9 @@ void AWallBuilderController::BuildNewWall()
 		GetHitResultUnderCursor(ECC_Visibility, false, HitResult);
 		if (HitResult.bBlockingHit) {
 			currWall++;
-			FString splineName = "Wall Spline " + FString::FromInt(currWall);
+			FString splineName = "Wall Spline " + FString::FromInt(meshNo);
+			meshNo++;
+			//FString splineName = "Wall Spline " + FString::FromInt(currWall);
 			WallSpline = NewObject<AWallSpline>(this, AWallSpline::StaticClass(), *splineName);
 			WallSpline->SplineStaticMesh = LoadObject<UStaticMesh>(this, TEXT("/Script/Engine.StaticMesh'/Game/StarterContent/Architecture/Wall_400x200.Wall_400x200'"));
 			WallSplineArray.Add(WallSpline);
@@ -77,7 +84,42 @@ void AWallBuilderController::GoToNextWall()
 void AWallBuilderController::DeleteSetOfWall()
 {
 	WallSplineArray[currWall]->SplineComponent->ClearSplinePoints();
+	WallSplineArray[currWall]->deleteComponents();
 	WallSplineArray[currWall]->Destroy();
+	if (currWall != WallSplineArray.Num() - 1) {
+		WallSplineArray.RemoveAt(currWall);
+	}
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Magenta, "Destroyed this set of wall. The next set of wall is automatically selected.");
+}
+
+void AWallBuilderController::UndoLastWall()
+{
+	if(WallSplineArray.Num() > 0 && currWall >= 0) {
+		int32 noOfPts = WallSplineArray[currWall]->SplineComponent->GetNumberOfSplinePoints();
+
+		if (noOfPts > 2) {
+			WallSplineArray[currWall]->SplineComponent->RemoveSplinePoint(noOfPts - 1);
+			//WallSplineArray[currWall]->SplineComponent->RemoveSplinePoint(noOfPts - 2);
+
+			WallSplineArray[currWall]->deleteLastWall();
+			WallSplineArray[currWall]->GenerateSplineMeshComponents();
+			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Magenta, "Undid creation of the last wall");
+		}
+		else if (noOfPts == 2) {
+			WallSplineArray[currWall]->SplineComponent->RemoveSplinePoint(noOfPts - 1);
+			WallSplineArray[currWall]->SplineComponent->RemoveSplinePoint(noOfPts - 2);
+			WallSplineArray[currWall]->deleteLastWall();
+			WallSplineArray[currWall]->GenerateSplineMeshComponents();
+
+			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Magenta, "Undid creation of the last wall");
+		}
+		else {
+			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Magenta, "Not enough spline points to undo last wall");
+		}
+	}
+	else {
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Magenta, "No walls to undo");
+	}
 }
 
 void AWallBuilderController::SetupInputComponent()
@@ -106,12 +148,17 @@ void AWallBuilderController::SetupInputComponent()
 	DestroySetOfWall->ValueType = EInputActionValueType::Boolean;
 	InputMappingContext->MapKey(DestroySetOfWall, EKeys::B);
 
+	UInputAction* UndoWall = NewObject<UInputAction>();
+	UndoWall->ValueType = EInputActionValueType::Boolean;
+	InputMappingContext->MapKey(UndoWall, EKeys::Z);
+
 	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
 	EnhancedInputComponent->BindAction(CreateWall, ETriggerEvent::Completed, this, &AWallBuilderController::BuildWall);
 	EnhancedInputComponent->BindAction(NewWall, ETriggerEvent::Completed, this, &AWallBuilderController::BuildNewWall);
 	EnhancedInputComponent->BindAction(PreviousWall, ETriggerEvent::Completed, this, &AWallBuilderController::GoToPreviousWall);
 	EnhancedInputComponent->BindAction(NextWall, ETriggerEvent::Completed, this, &AWallBuilderController::GoToNextWall);
 	EnhancedInputComponent->BindAction(DestroySetOfWall, ETriggerEvent::Completed, this, &AWallBuilderController::DeleteSetOfWall);
+	EnhancedInputComponent->BindAction(UndoWall, ETriggerEvent::Completed, this, &AWallBuilderController::UndoLastWall);
 
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer())) {
 		Subsystem->AddMappingContext(InputMappingContext, 0);
