@@ -9,7 +9,7 @@
 
 #include "WallBuilderController.generated.h"
 
-DECLARE_DELEGATE_OneParam(PrintMessage, const FString&)
+DECLARE_DELEGATE_TwoParams(PrintMessage, const FString&, const FString&)
 
 /**
  * 
@@ -41,9 +41,6 @@ class DYNAMICWALL_API AWallBuilderController : public APlayerController
 	UPROPERTY()
 	TArray<AWallSpline*> WallSplineArray;
 
-	UPROPERTY()
-	TArray<FVector> PointsLocation;
-
 	/*UPROPERTY()
 	FVector ClickedLocation;*/
 
@@ -56,7 +53,7 @@ protected:
 	virtual void SetupInputComponent() override;
 public:
 	UFUNCTION(BlueprintImplementableEvent)
-	void ShowInViewPort(const FString& msg);
+	void ShowInViewPort(const FString& InfoMsg, const FString& ErrorMsg);
 
 	AWallBuilderController();
 };

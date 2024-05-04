@@ -26,7 +26,6 @@ void AWallBuilderController::BeginPlay()
 
 	bShowMouseCursor = true;
 	delegateMsg.BindUFunction(this, FName{ "ShowInViewPort" });
-	//delegateMsg.BindUObject(this, &AWallBuilderController::ShowInViewPort);
 }
 
 void AWallBuilderController::BuildWall()
@@ -37,7 +36,6 @@ void AWallBuilderController::BuildWall()
 	if (HitResult.bBlockingHit)
 	{
 		FVector ClickedLocation = HitResult.Location;
-		//PointsLocation[currWall] = HitResult.Location;
 		if (WallSplineArray[currWall]) {
 			WallSplineArray[currWall]->GenerateWall(ClickedLocation);
 		}
@@ -47,10 +45,10 @@ void AWallBuilderController::BuildWall()
 void AWallBuilderController::BuildNewWall()
 {
 	if (bWasLeftClickLatest) {
-		delegateMsg.Execute(FString{ "Create a wall before in the existing set before creating a new set of walls." });
+		delegateMsg.Execute(FString{ "" }, FString{ "Create a wall before in the existing set before creating a new set of walls." });
 	}
 	else if (currWall < WallSplineArray.Num() - 1) {
-		delegateMsg.Execute(FString{ "Go to the latest wall before creating a new set of walls." });
+		delegateMsg.Execute(FString{ "" }, FString{ "Go to the latest wall before creating a new set of walls." });
 	}
 	else {
 		bWasLeftClickLatest = true;
@@ -71,9 +69,10 @@ void AWallBuilderController::GoToPreviousWall()
 {
 	if (currWall > 0) {
 		currWall--;
+		delegateMsg.Execute(FString{ "Switched to previous wall set" }, FString{ "" });
 	}
 	else {
-		delegateMsg.Execute(FString{ "Already on the starting wall. Can't go previous from this set of walls." });
+		delegateMsg.Execute(FString{ "" }, FString{ "Already on the starting wall. Can't go previous from this set of walls." });
 	}
 }
 
@@ -81,9 +80,10 @@ void AWallBuilderController::GoToNextWall()
 {
 	if (currWall < WallSplineArray.Num() - 1) {
 		currWall++;
+		delegateMsg.Execute(FString{ "Switched to next wall set" }, FString{ "" });
 	}
 	else {
-		delegateMsg.Execute(FString{ "Already on the latest wall. Can't go next from this set of walls." });
+		delegateMsg.Execute(FString{ "" }, FString{ "Already on the latest wall. Can't go next from this set of walls." });
 	}
 }
 
@@ -95,7 +95,7 @@ void AWallBuilderController::DeleteSetOfWall()
 	if (currWall != WallSplineArray.Num() - 1) {
 		WallSplineArray.RemoveAt(currWall);
 	}
-	delegateMsg.Execute(FString{ "Destroyed this set of wall. The next set of wall is automatically selected." });
+	delegateMsg.Execute(FString{ "Destroyed this set of wall. The next set of wall is automatically selected." }, FString{ "" });
 }
 
 void AWallBuilderController::UndoLastWall()
@@ -108,7 +108,7 @@ void AWallBuilderController::UndoLastWall()
 
 			WallSplineArray[currWall]->deleteLastWall();
 			WallSplineArray[currWall]->GenerateSplineMeshComponents();
-			delegateMsg.Execute(FString{ "Undid creation of the last wall in the current set of walls." });
+			delegateMsg.Execute(FString{ "Undid creation of the last wall in the current set of walls." }, FString{ "" });
 		}
 		else if (noOfPts == 2) {
 			WallSplineArray[currWall]->SplineComponent->RemoveSplinePoint(noOfPts - 1);
@@ -117,14 +117,14 @@ void AWallBuilderController::UndoLastWall()
 			WallSplineArray[currWall]->deleteLastWall();
 			WallSplineArray[currWall]->GenerateSplineMeshComponents();
 
-			delegateMsg.Execute(FString{ "Undid creation of the last wall in the current set of walls." });
+			delegateMsg.Execute(FString{ "Undid creation of the last wall in the current set of walls." }, FString{ "" });
 		}
 		else {
-			delegateMsg.Execute(FString{ "Not enough spline points to undo last wall in the current set of walls." });
+			delegateMsg.Execute(FString{ "" }, FString{ "Not enough spline points to undo last wall in the current set of walls." });
 		}
 	}
 	else {
-		delegateMsg.Execute(FString{ "No walls to undo" });
+		delegateMsg.Execute(FString{ "" }, FString{ "No walls to undo" });
 	}
 }
 
