@@ -9,13 +9,15 @@
 
 AWallBuilderController::AWallBuilderController() : currWall{ 0 }
 {
-	FString SplineName = FString::Printf(TEXT("Wall Spline %d"), meshNo);
-	meshNo++;
-	WallSpline = CreateDefaultSubobject<AWallSpline>(*SplineName);
+	meshNo = 0;
+	//FString SplineName = FString::Printf(TEXT("Wall Spline %d"), meshNo);
+	//meshNo++;
+	//WallSpline = CreateDefaultSubobject<AWallSpline>(*SplineName);
+	WallSpline = CreateDefaultSubobject<AWallSpline>(TEXT("Wall Spline 0"));
 
-	//WallSpline = CreateDefaultSubobject<AWallSpline>(TEXT("Wall Spline 0"));
-	WallSplineArray.Add(WallSpline);
 	WallSpline->SplineStaticMesh = LoadObject<UStaticMesh>(this, TEXT("/Script/Engine.StaticMesh'/Game/StarterContent/Architecture/Wall_400x200.Wall_400x200'"));
+	WallSplineArray.Empty();
+	WallSplineArray.Add(WallSpline);
 }
 
 void AWallBuilderController::BeginPlay()
@@ -23,6 +25,8 @@ void AWallBuilderController::BeginPlay()
 	Super::BeginPlay();
 
 	bShowMouseCursor = true;
+	delegateMsg.BindUFunction(this, FName{ "ShowInViewPort" });
+	//delegateMsg.BindUObject(this, &AWallBuilderController::ShowInViewPort);
 }
 
 void AWallBuilderController::BuildWall()
@@ -43,7 +47,10 @@ void AWallBuilderController::BuildWall()
 void AWallBuilderController::BuildNewWall()
 {
 	if (bWasLeftClickLatest) {
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, "Create a wall before going on to the next wall.");
+		delegateMsg.Execute(FString{ "Create a wall before in the existing set before creating a new set of walls." });
+	}
+	else if (currWall < WallSplineArray.Num() - 1) {
+		delegateMsg.Execute(FString{ "Go to the latest wall before creating a new set of walls." });
 	}
 	else {
 		bWasLeftClickLatest = true;
@@ -51,9 +58,8 @@ void AWallBuilderController::BuildNewWall()
 		GetHitResultUnderCursor(ECC_Visibility, false, HitResult);
 		if (HitResult.bBlockingHit) {
 			currWall++;
-			FString splineName = "Wall Spline " + FString::FromInt(meshNo);
 			meshNo++;
-			//FString splineName = "Wall Spline " + FString::FromInt(currWall);
+			FString splineName = "Wall Spline " + FString::FromInt(meshNo);
 			WallSpline = NewObject<AWallSpline>(this, AWallSpline::StaticClass(), *splineName);
 			WallSpline->SplineStaticMesh = LoadObject<UStaticMesh>(this, TEXT("/Script/Engine.StaticMesh'/Game/StarterContent/Architecture/Wall_400x200.Wall_400x200'"));
 			WallSplineArray.Add(WallSpline);
@@ -67,7 +73,7 @@ void AWallBuilderController::GoToPreviousWall()
 		currWall--;
 	}
 	else {
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Magenta, "Already on the starting wall. Can't go further previous");
+		delegateMsg.Execute(FString{ "Already on the starting wall. Can't go previous from this set of walls." });
 	}
 }
 
@@ -77,7 +83,7 @@ void AWallBuilderController::GoToNextWall()
 		currWall++;
 	}
 	else {
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Magenta, "Already on the latest wall. Can't go further next");
+		delegateMsg.Execute(FString{ "Already on the latest wall. Can't go next from this set of walls." });
 	}
 }
 
@@ -89,7 +95,7 @@ void AWallBuilderController::DeleteSetOfWall()
 	if (currWall != WallSplineArray.Num() - 1) {
 		WallSplineArray.RemoveAt(currWall);
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Magenta, "Destroyed this set of wall. The next set of wall is automatically selected.");
+	delegateMsg.Execute(FString{ "Destroyed this set of wall. The next set of wall is automatically selected." });
 }
 
 void AWallBuilderController::UndoLastWall()
@@ -99,26 +105,26 @@ void AWallBuilderController::UndoLastWall()
 
 		if (noOfPts > 2) {
 			WallSplineArray[currWall]->SplineComponent->RemoveSplinePoint(noOfPts - 1);
-			//WallSplineArray[currWall]->SplineComponent->RemoveSplinePoint(noOfPts - 2);
 
 			WallSplineArray[currWall]->deleteLastWall();
 			WallSplineArray[currWall]->GenerateSplineMeshComponents();
-			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Magenta, "Undid creation of the last wall");
+			delegateMsg.Execute(FString{ "Undid creation of the last wall in the current set of walls." });
 		}
 		else if (noOfPts == 2) {
 			WallSplineArray[currWall]->SplineComponent->RemoveSplinePoint(noOfPts - 1);
 			WallSplineArray[currWall]->SplineComponent->RemoveSplinePoint(noOfPts - 2);
+
 			WallSplineArray[currWall]->deleteLastWall();
 			WallSplineArray[currWall]->GenerateSplineMeshComponents();
 
-			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Magenta, "Undid creation of the last wall");
+			delegateMsg.Execute(FString{ "Undid creation of the last wall in the current set of walls." });
 		}
 		else {
-			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Magenta, "Not enough spline points to undo last wall");
+			delegateMsg.Execute(FString{ "Not enough spline points to undo last wall in the current set of walls." });
 		}
 	}
 	else {
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Magenta, "No walls to undo");
+		delegateMsg.Execute(FString{ "No walls to undo" });
 	}
 }
 
