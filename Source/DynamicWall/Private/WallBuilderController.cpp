@@ -141,16 +141,13 @@ void AWallBuilderController::DeleteEveryWall()
 		WallSplineArray[i]->deleteComponents();
 		WallSplineArray[i]->Destroy();
 		if (i != n - 1) {
-			//WallSplineArray.RemoveAt(i);
-			delegateMsg.Execute(FString{ "Destroyed this set of wall. The next set of wall is automatically selected." }, FString{ "" });
+			delegateMsg.Execute(FString{ "Destroyed all set of wall. A new set of wall is automatically selected." }, FString{ "" });
 		}
 		else if (i == 0 && n == 1) {
-			delegateMsg.Execute(FString{ "Destroyed this set of wall. The next set of wall is automatically selected." }, FString{ "" });
+			delegateMsg.Execute(FString{ "Destroyed all set of wall. A new set of wall is automatically selected." }, FString{ "" });
 		}
 		else {
-			//WallSplineArray.RemoveAt(i);
-			//i--;
-			delegateMsg.Execute(FString{ "Destroyed this set of wall. The previous set of wall is automatically selected." }, FString{ "" });
+			delegateMsg.Execute(FString{ "Destroyed all set of wall. A new set of wall is automatically selected." }, FString{ "" });
 		}
 	}
 
@@ -159,11 +156,6 @@ void AWallBuilderController::DeleteEveryWall()
 	}
 	currWall = 0;
 
-	/*for(AWallSpline* obj: WallSplineArray) {
-		obj->SplineComponent->ClearSplinePoints();
-		obj->deleteComponents();
-		obj->Destroy();
-	}*/
 }
 
 void AWallBuilderController::SetupInputComponent()

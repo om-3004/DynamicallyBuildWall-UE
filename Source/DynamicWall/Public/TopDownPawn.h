@@ -16,6 +16,8 @@
 
 #include "TopDownPawn.generated.h"
 
+DECLARE_DELEGATE_ThreeParams(CameraSpringArmProps, const float&, const float&, const float&)
+
 UCLASS()
 class DYNAMICWALL_API ATopDownPawn : public APawn
 {
@@ -37,6 +39,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UFloatingPawnMovement* FloatingPawnMovement;
 
+	CameraSpringArmProps displayProps;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -56,4 +60,6 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShowPropsInViewPort(const float& TargetArmLength, const float& TargetOffset, const float& CameraAngle);
 };

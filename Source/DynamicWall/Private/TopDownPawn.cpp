@@ -35,6 +35,8 @@ ATopDownPawn::ATopDownPawn()
 void ATopDownPawn::BeginPlay()
 {
 	Super::BeginPlay();
+
+	displayProps.BindUFunction(this, FName{ "ShowPropsInViewPort" });
 }
 
 
@@ -127,14 +129,6 @@ void ATopDownPawn::Zoom(const FInputActionValue& Value) {
 		SpringArmComponent->TargetArmLength = FMath::Clamp(SpringArmComponent->TargetArmLength, -500, 0);
 		SpringArmComponent->TargetOffset.Z = FMath::Clamp(SpringArmComponent->TargetOffset.Z, 0, 1500);
 
-		FString FloatAsString = FString::SanitizeFloat(SpringArmComponent->TargetArmLength);
-		FString DebugMessage = FString::Printf(TEXT("MyFloatValue: %s"), *FloatAsString);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, FString::Printf(TEXT("armlength: %f"), SpringArmComponent->TargetArmLength));
-
-		FloatAsString = FString::SanitizeFloat(SpringArmComponent->TargetOffset.Z);
-		DebugMessage = FString::Printf(TEXT("MyFloatValue: %s"), *FloatAsString);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, FString::Printf(TEXT("offsetZ: %f"), SpringArmComponent->TargetOffset.Z));
-
 		float Angle;
 		if (SpringArmComponent->TargetArmLength == 0) {
 			Angle = -90;
@@ -151,11 +145,9 @@ void ATopDownPawn::Zoom(const FInputActionValue& Value) {
 			Angle = 0;
 		}
 
-		FloatAsString = FString::SanitizeFloat(Angle);
-		DebugMessage = FString::Printf(TEXT("MyFloatValue: %s"), *FloatAsString);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, FString::Printf(TEXT("Angle: %f"), Angle));
-
 		CameraComponent->SetRelativeRotation(FRotator(Angle, 0, 0));
+
+		displayProps.Execute(SpringArmComponent->TargetArmLength, SpringArmComponent->TargetOffset.Z, Angle);
 	}
 	else {
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("ZoomError"));

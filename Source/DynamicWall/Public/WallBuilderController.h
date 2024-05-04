@@ -39,11 +39,7 @@ class DYNAMICWALL_API AWallBuilderController : public APlayerController
 	UPROPERTY()
 	TArray<AWallSpline*> WallSplineArray;
 
-	/*UPROPERTY()
-	FVector ClickedLocation;*/
-
 	PrintMessage delegateMsg;
-
 
 protected:
 
