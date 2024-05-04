@@ -21,7 +21,6 @@ class DYNAMICWALL_API AWallSpline : public AActor
 {
 	GENERATED_BODY()
 
-
 public:	
 	// Sets default values for this actor's properties
 	AWallSpline();

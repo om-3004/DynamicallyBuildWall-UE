@@ -132,6 +132,40 @@ void AWallBuilderController::UndoLastWall()
 	}
 }
 
+void AWallBuilderController::DeleteEveryWall()
+{
+
+	int32 n = WallSplineArray.Num();
+	for (int i = 0; i < n; i++) {
+		WallSplineArray[i]->SplineComponent->ClearSplinePoints();
+		WallSplineArray[i]->deleteComponents();
+		WallSplineArray[i]->Destroy();
+		if (i != n - 1) {
+			//WallSplineArray.RemoveAt(i);
+			delegateMsg.Execute(FString{ "Destroyed this set of wall. The next set of wall is automatically selected." }, FString{ "" });
+		}
+		else if (i == 0 && n == 1) {
+			delegateMsg.Execute(FString{ "Destroyed this set of wall. The next set of wall is automatically selected." }, FString{ "" });
+		}
+		else {
+			//WallSplineArray.RemoveAt(i);
+			//i--;
+			delegateMsg.Execute(FString{ "Destroyed this set of wall. The previous set of wall is automatically selected." }, FString{ "" });
+		}
+	}
+
+	for (int i = 1; i < n; i++) {
+		WallSplineArray.RemoveAt(1);
+	}
+	currWall = 0;
+
+	/*for(AWallSpline* obj: WallSplineArray) {
+		obj->SplineComponent->ClearSplinePoints();
+		obj->deleteComponents();
+		obj->Destroy();
+	}*/
+}
+
 void AWallBuilderController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
@@ -162,6 +196,10 @@ void AWallBuilderController::SetupInputComponent()
 	UndoWall->ValueType = EInputActionValueType::Boolean;
 	InputMappingContext->MapKey(UndoWall, EKeys::Z);
 
+	UInputAction* DeleteAllSetOfWalls = NewObject<UInputAction>();
+	DeleteAllSetOfWalls->ValueType = EInputActionValueType::Boolean;
+	InputMappingContext->MapKey(DeleteAllSetOfWalls, EKeys::C);
+
 	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
 	EnhancedInputComponent->BindAction(CreateWall, ETriggerEvent::Completed, this, &AWallBuilderController::BuildWall);
 	EnhancedInputComponent->BindAction(NewWall, ETriggerEvent::Completed, this, &AWallBuilderController::BuildNewWall);
@@ -169,6 +207,7 @@ void AWallBuilderController::SetupInputComponent()
 	EnhancedInputComponent->BindAction(NextWall, ETriggerEvent::Completed, this, &AWallBuilderController::GoToNextWall);
 	EnhancedInputComponent->BindAction(DestroySetOfWall, ETriggerEvent::Completed, this, &AWallBuilderController::DeleteSetOfWall);
 	EnhancedInputComponent->BindAction(UndoWall, ETriggerEvent::Completed, this, &AWallBuilderController::UndoLastWall);
+	EnhancedInputComponent->BindAction(DeleteAllSetOfWalls, ETriggerEvent::Completed, this, &AWallBuilderController::DeleteEveryWall);
 
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer())) {
 		Subsystem->AddMappingContext(InputMappingContext, 0);
