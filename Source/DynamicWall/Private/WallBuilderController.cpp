@@ -10,9 +10,6 @@
 AWallBuilderController::AWallBuilderController() : currWall{ 0 }
 {
 	meshNo = 0;
-	//FString SplineName = FString::Printf(TEXT("Wall Spline %d"), meshNo);
-	//meshNo++;
-	//WallSpline = CreateDefaultSubobject<AWallSpline>(*SplineName);
 	WallSpline = CreateDefaultSubobject<AWallSpline>(TEXT("Wall Spline 0"));
 
 	WallSpline->SplineStaticMesh = LoadObject<UStaticMesh>(this, TEXT("/Script/Engine.StaticMesh'/Game/StarterContent/Architecture/Wall_400x200.Wall_400x200'"));
@@ -30,7 +27,6 @@ void AWallBuilderController::BeginPlay()
 
 void AWallBuilderController::BuildWall()
 {
-	bWasLeftClickLatest = false;
 	FHitResult HitResult;
 	GetHitResultUnderCursor(ECC_Visibility, false, HitResult);
 	if (HitResult.bBlockingHit)
@@ -44,14 +40,13 @@ void AWallBuilderController::BuildWall()
 
 void AWallBuilderController::BuildNewWall()
 {
-	if (bWasLeftClickLatest) {
-		delegateMsg.Execute(FString{ "" }, FString{ "Create a wall before in the existing set before creating a new set of walls." });
+	if (WallSplineArray[currWall]->SplineComponent->GetNumberOfSplinePoints() == 0) {
+		delegateMsg.Execute(FString{ "" }, FString{ "Create a wall in the existing set before creating a new set of walls." });
 	}
 	else if (currWall < WallSplineArray.Num() - 1) {
 		delegateMsg.Execute(FString{ "" }, FString{ "Go to the latest wall before creating a new set of walls." });
 	}
 	else {
-		bWasLeftClickLatest = true;
 		FHitResult HitResult;
 		GetHitResultUnderCursor(ECC_Visibility, false, HitResult);
 		if (HitResult.bBlockingHit) {
@@ -61,6 +56,7 @@ void AWallBuilderController::BuildNewWall()
 			WallSpline = NewObject<AWallSpline>(this, AWallSpline::StaticClass(), *splineName);
 			WallSpline->SplineStaticMesh = LoadObject<UStaticMesh>(this, TEXT("/Script/Engine.StaticMesh'/Game/StarterContent/Architecture/Wall_400x200.Wall_400x200'"));
 			WallSplineArray.Add(WallSpline);
+			delegateMsg.Execute(FString{ "Created a new wall set. Click and select 2 points to build first wall." }, FString{ "" });
 		}
 	}
 }
@@ -94,8 +90,16 @@ void AWallBuilderController::DeleteSetOfWall()
 	WallSplineArray[currWall]->Destroy();
 	if (currWall != WallSplineArray.Num() - 1) {
 		WallSplineArray.RemoveAt(currWall);
+		delegateMsg.Execute(FString{ "Destroyed this set of wall. The next set of wall is automatically selected." }, FString{ "" });
 	}
-	delegateMsg.Execute(FString{ "Destroyed this set of wall. The next set of wall is automatically selected." }, FString{ "" });
+	else if (currWall == 0 && WallSplineArray.Num() == 1) {
+		delegateMsg.Execute(FString{ "Destroyed this set of wall. The next set of wall is automatically selected." }, FString{ "" });
+	}
+	else {
+		WallSplineArray.RemoveAt(currWall);
+		currWall--;
+		delegateMsg.Execute(FString{ "Destroyed this set of wall. The previous set of wall is automatically selected." }, FString{ "" });
+	}
 }
 
 void AWallBuilderController::UndoLastWall()

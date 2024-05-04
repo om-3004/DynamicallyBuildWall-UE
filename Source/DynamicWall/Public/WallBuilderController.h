@@ -30,9 +30,6 @@ class DYNAMICWALL_API AWallBuilderController : public APlayerController
 	int currWall;
 
 	UPROPERTY()
-	bool bWasLeftClickLatest;
-
-	UPROPERTY()
 	int32 meshNo;
 
 	UPROPERTY()
