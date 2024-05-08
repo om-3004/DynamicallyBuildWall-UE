@@ -41,10 +41,10 @@ void AWallBuilderController::BuildWall()
 void AWallBuilderController::BuildNewWall()
 {
 	if (WallSplineArray[currWall]->SplineComponent->GetNumberOfSplinePoints() == 0) {
-		delegateMsg.Execute(FString{ "" }, FString{ "Create a wall in the existing set before creating a new set of walls." });
+		delegateMsg.Execute(FString{ "" }, FString{ "Create a wall in the existing segment before creating a new segment of walls." });
 	}
 	else if (currWall < WallSplineArray.Num() - 1) {
-		delegateMsg.Execute(FString{ "" }, FString{ "Go to the latest wall before creating a new set of walls." });
+		delegateMsg.Execute(FString{ "" }, FString{ "Go to the latest wall before creating a new segment of walls." });
 	}
 	else {
 		FHitResult HitResult;
@@ -56,7 +56,7 @@ void AWallBuilderController::BuildNewWall()
 			WallSpline = NewObject<AWallSpline>(this, AWallSpline::StaticClass(), *splineName);
 			WallSpline->SplineStaticMesh = LoadObject<UStaticMesh>(this, TEXT("/Script/Engine.StaticMesh'/Game/StarterContent/Architecture/Wall_400x200.Wall_400x200'"));
 			WallSplineArray.Add(WallSpline);
-			delegateMsg.Execute(FString{ "Created a new wall set. Click and select 2 points to build first wall." }, FString{ "" });
+			delegateMsg.Execute(FString{ "Created a new wall segment. Click and select 2 points to build first wall." }, FString{ "" });
 		}
 	}
 }
@@ -65,10 +65,10 @@ void AWallBuilderController::GoToPreviousWall()
 {
 	if (currWall > 0) {
 		currWall--;
-		delegateMsg.Execute(FString{ "Switched to previous wall set" }, FString{ "" });
+		delegateMsg.Execute(FString{ "Switched to previous wall segment" }, FString{ "" });
 	}
 	else {
-		delegateMsg.Execute(FString{ "" }, FString{ "Already on the starting wall. Can't go previous from this set of walls." });
+		delegateMsg.Execute(FString{ "" }, FString{ "Already on the starting wall. Can't go previous from this segment of walls." });
 	}
 }
 
@@ -76,29 +76,29 @@ void AWallBuilderController::GoToNextWall()
 {
 	if (currWall < WallSplineArray.Num() - 1) {
 		currWall++;
-		delegateMsg.Execute(FString{ "Switched to next wall set" }, FString{ "" });
+		delegateMsg.Execute(FString{ "Switched to next wall segment" }, FString{ "" });
 	}
 	else {
-		delegateMsg.Execute(FString{ "" }, FString{ "Already on the latest wall. Can't go next from this set of walls." });
+		delegateMsg.Execute(FString{ "" }, FString{ "Already on the latest wall. Can't go next from this segment of walls." });
 	}
 }
 
-void AWallBuilderController::DeleteSetOfWall()
+void AWallBuilderController::DeleteSegmentOfWall()
 {
 	WallSplineArray[currWall]->SplineComponent->ClearSplinePoints();
 	WallSplineArray[currWall]->deleteComponents();
 	WallSplineArray[currWall]->Destroy();
 	if (currWall != WallSplineArray.Num() - 1) {
 		WallSplineArray.RemoveAt(currWall);
-		delegateMsg.Execute(FString{ "Destroyed this set of wall. The next set of wall is automatically selected." }, FString{ "" });
+		delegateMsg.Execute(FString{ "Destroyed this segment of wall. The next segment of wall is automatically selected." }, FString{ "" });
 	}
 	else if (currWall == 0 && WallSplineArray.Num() == 1) {
-		delegateMsg.Execute(FString{ "Destroyed this set of wall. The next set of wall is automatically selected." }, FString{ "" });
+		delegateMsg.Execute(FString{ "Destroyed this segment of wall. The next segment of wall is automatically selected." }, FString{ "" });
 	}
 	else {
 		WallSplineArray.RemoveAt(currWall);
 		currWall--;
-		delegateMsg.Execute(FString{ "Destroyed this set of wall. The previous set of wall is automatically selected." }, FString{ "" });
+		delegateMsg.Execute(FString{ "Destroyed this segment of wall. The previous segment of wall is automatically selected." }, FString{ "" });
 	}
 }
 
@@ -112,7 +112,7 @@ void AWallBuilderController::UndoLastWall()
 
 			WallSplineArray[currWall]->deleteLastWall();
 			WallSplineArray[currWall]->GenerateSplineMeshComponents();
-			delegateMsg.Execute(FString{ "Undid creation of the last wall in the current set of walls." }, FString{ "" });
+			delegateMsg.Execute(FString{ "Undid creation of the last wall in the current segment of walls." }, FString{ "" });
 		}
 		else if (noOfPts == 2) {
 			WallSplineArray[currWall]->SplineComponent->RemoveSplinePoint(noOfPts - 1);
@@ -121,10 +121,23 @@ void AWallBuilderController::UndoLastWall()
 			WallSplineArray[currWall]->deleteLastWall();
 			WallSplineArray[currWall]->GenerateSplineMeshComponents();
 
-			delegateMsg.Execute(FString{ "Undid creation of the last wall in the current set of walls." }, FString{ "" });
+			if (WallSplineArray.Num() == 1 && currWall == 0) { // Only 1 wall segment
+				delegateMsg.Execute(FString{ "Undid creation of the last wall in the current segment of walls. Created a new wall segment." }, FString{ "" });
+			}
+			else if (currWall < WallSplineArray.Num() - 1) { // Not latest wall segment
+				WallSplineArray.RemoveAt(currWall);
+
+				delegateMsg.Execute(FString{ "Undid creation of the last wall in the current segment of walls. Switched to next wall segment." }, FString{ "" });
+			}
+			else if(currWall == WallSplineArray.Num() - 1) { // Latest wall segment
+				WallSplineArray.RemoveAt(currWall);
+				currWall--;
+
+				delegateMsg.Execute(FString{ "Undid creation of the last wall in the current segment of walls. Switched to previous wall segment." }, FString{ "" });
+			}
 		}
 		else {
-			delegateMsg.Execute(FString{ "" }, FString{ "Not enough spline points to undo last wall in the current set of walls." });
+			delegateMsg.Execute(FString{ "" }, FString{ "Not enough spline points to undo last wall in the current segment of walls." });
 		}
 	}
 	else {
@@ -141,13 +154,13 @@ void AWallBuilderController::DeleteEveryWall()
 		WallSplineArray[i]->deleteComponents();
 		WallSplineArray[i]->Destroy();
 		if (i != n - 1) {
-			delegateMsg.Execute(FString{ "Destroyed all set of wall. A new set of wall is automatically selected." }, FString{ "" });
+			delegateMsg.Execute(FString{ "Destroyed all segments of wall. A new segment of wall is automatically selected." }, FString{ "" });
 		}
 		else if (i == 0 && n == 1) {
-			delegateMsg.Execute(FString{ "Destroyed all set of wall. A new set of wall is automatically selected." }, FString{ "" });
+			delegateMsg.Execute(FString{ "Destroyed all segments of wall. A new segment of wall is automatically selected." }, FString{ "" });
 		}
 		else {
-			delegateMsg.Execute(FString{ "Destroyed all set of wall. A new set of wall is automatically selected." }, FString{ "" });
+			delegateMsg.Execute(FString{ "Destroyed all segments of wall. A new segment of wall is automatically selected." }, FString{ "" });
 		}
 	}
 
@@ -180,26 +193,26 @@ void AWallBuilderController::SetupInputComponent()
 	NextWall->ValueType = EInputActionValueType::Boolean;
 	InputMappingContext->MapKey(NextWall, EKeys::N);
 
-	UInputAction* DestroySetOfWall = NewObject<UInputAction>();
-	DestroySetOfWall->ValueType = EInputActionValueType::Boolean;
-	InputMappingContext->MapKey(DestroySetOfWall, EKeys::B);
+	UInputAction* DestroySegmentOfWall = NewObject<UInputAction>();
+	DestroySegmentOfWall->ValueType = EInputActionValueType::Boolean;
+	InputMappingContext->MapKey(DestroySegmentOfWall, EKeys::B);
 
 	UInputAction* UndoWall = NewObject<UInputAction>();
 	UndoWall->ValueType = EInputActionValueType::Boolean;
 	InputMappingContext->MapKey(UndoWall, EKeys::Z);
 
-	UInputAction* DeleteAllSetOfWalls = NewObject<UInputAction>();
-	DeleteAllSetOfWalls->ValueType = EInputActionValueType::Boolean;
-	InputMappingContext->MapKey(DeleteAllSetOfWalls, EKeys::C);
+	UInputAction* DeleteAllSegmentOfWalls = NewObject<UInputAction>();
+	DeleteAllSegmentOfWalls->ValueType = EInputActionValueType::Boolean;
+	InputMappingContext->MapKey(DeleteAllSegmentOfWalls, EKeys::C);
 
 	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
 	EnhancedInputComponent->BindAction(CreateWall, ETriggerEvent::Completed, this, &AWallBuilderController::BuildWall);
 	EnhancedInputComponent->BindAction(NewWall, ETriggerEvent::Completed, this, &AWallBuilderController::BuildNewWall);
 	EnhancedInputComponent->BindAction(PreviousWall, ETriggerEvent::Completed, this, &AWallBuilderController::GoToPreviousWall);
 	EnhancedInputComponent->BindAction(NextWall, ETriggerEvent::Completed, this, &AWallBuilderController::GoToNextWall);
-	EnhancedInputComponent->BindAction(DestroySetOfWall, ETriggerEvent::Completed, this, &AWallBuilderController::DeleteSetOfWall);
+	EnhancedInputComponent->BindAction(DestroySegmentOfWall, ETriggerEvent::Completed, this, &AWallBuilderController::DeleteSegmentOfWall);
 	EnhancedInputComponent->BindAction(UndoWall, ETriggerEvent::Completed, this, &AWallBuilderController::UndoLastWall);
-	EnhancedInputComponent->BindAction(DeleteAllSetOfWalls, ETriggerEvent::Completed, this, &AWallBuilderController::DeleteEveryWall);
+	EnhancedInputComponent->BindAction(DeleteAllSegmentOfWalls, ETriggerEvent::Completed, this, &AWallBuilderController::DeleteEveryWall);
 
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer())) {
 		Subsystem->AddMappingContext(InputMappingContext, 0);

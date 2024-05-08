@@ -23,7 +23,7 @@ class DYNAMICWALL_API AWallBuilderController : public APlayerController
 	void BuildNewWall();
 	void GoToPreviousWall();
 	void GoToNextWall();
-	void DeleteSetOfWall();
+	void DeleteSegmentOfWall();
 	void UndoLastWall();
 	void DeleteEveryWall();
 
