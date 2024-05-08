@@ -37,7 +37,6 @@ void AWallSpline::deleteLastWall()
 {
 	//int32 n = SplineMeshComponentsArray.Num();
 	if (SplineMeshComponentsArray[SplineMeshComponentsArray.Num() - 1]) {
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Magenta, "abcbb");
 		SplineMeshComponentsArray[SplineMeshComponentsArray.Num() - 1]->DestroyComponent();
 		SplineMeshComponentsArray[SplineMeshComponentsArray.Num() - 1] = nullptr;
 		SplineMeshComponentsArray.RemoveAt(SplineMeshComponentsArray.Num() - 1);

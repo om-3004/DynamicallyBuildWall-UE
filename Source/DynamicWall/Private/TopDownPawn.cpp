@@ -149,9 +149,6 @@ void ATopDownPawn::Zoom(const FInputActionValue& Value) {
 
 		displayProps.Execute(SpringArmComponent->TargetArmLength, SpringArmComponent->TargetOffset.Z, Angle);
 	}
-	else {
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("ZoomError"));
-	}
 }
 
 // Called every frame
